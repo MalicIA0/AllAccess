@@ -1,0 +1,392 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-vault-bg: #09041a;
+  --color-vault-panel: #120829;
+  --color-vault-card: #180b36;
+  --color-vault-border: #32195e;
+  --color-vault-text: #e8e8f2;
+  --color-vault-muted: #8a8aa8;
+  --color-vault-accent: #9d4dff;
+  --color-vault-accent2: #ff3df5;
+  --color-vault-gold: #fbbf24;
+  --color-vault-green: #34d399;
+  --font-display: 'Segoe UI Variable Display', 'Segoe UI', system-ui, sans-serif;
+}
+
+/* ---------- Thèmes ---------- */
+/* défaut = Ultraviolet (violet électrique → fuchsia néon), défini dans @theme ci-dessus.
+   NB : les identifiants historiques (rubis, emeraude…) sont conservés pour ne pas casser
+   le thème sauvegardé des utilisateurs — seuls les palettes et les noms affichés changent. */
+[data-theme='rubis'] {
+  /* Carmin — rouge sang néon + or champagne, luxe agressif */
+  --color-vault-bg: #130308;
+  --color-vault-panel: #1e0710;
+  --color-vault-card: #260a14;
+  --color-vault-border: #4b1526;
+  --color-vault-accent: #ff1745;
+  --color-vault-accent2: #ffd166;
+}
+[data-theme='emeraude'] {
+  /* Hologramme — menthe iridescente + rose holo */
+  --color-vault-bg: #020d0c;
+  --color-vault-panel: #071716;
+  --color-vault-card: #0a1f1d;
+  --color-vault-border: #164039;
+  --color-vault-accent: #00ffc8;
+  --color-vault-accent2: #ff8ae2;
+}
+[data-theme='minuit'] {
+  /* Saphir — bleu électrique profond + cyan pur */
+  --color-vault-bg: #02081c;
+  --color-vault-panel: #061129;
+  --color-vault-card: #091737;
+  --color-vault-border: #16305e;
+  --color-vault-accent: #2979ff;
+  --color-vault-accent2: #00e5ff;
+}
+[data-theme='crepuscule'] {
+  /* Éclipse — orange solaire → magenta incandescent */
+  --color-vault-bg: #150408;
+  --color-vault-panel: #200712;
+  --color-vault-card: #2a0a18;
+  --color-vault-border: #4e1430;
+  --color-vault-accent: #ff6a00;
+  --color-vault-accent2: #ff2fa0;
+}
+[data-theme='ornoir'] {
+  /* Midas — or 24 carats éclatant sur noir pur */
+  --color-vault-bg: #0a0904;
+  --color-vault-panel: #14120a;
+  --color-vault-card: #1b180d;
+  --color-vault-border: #3d3414;
+  --color-vault-accent: #ffd60a;
+  --color-vault-accent2: #fff3b0;
+}
+[data-theme='mono'] {
+  --color-vault-bg: #0a0a0a;
+  --color-vault-panel: #141414;
+  --color-vault-card: #1a1a1a;
+  --color-vault-border: #2e2e2e;
+  --color-vault-accent: #737373;
+  --color-vault-accent2: #d4d4d4;
+}
+[data-theme='synthwave'] {
+  --color-vault-bg: #0d0718;
+  --color-vault-panel: #170d28;
+  --color-vault-card: #1e1133;
+  --color-vault-border: #392055;
+  --color-vault-accent: #f472b6;
+  --color-vault-accent2: #38bdf8;
+}
+[data-theme='sakura'] {
+  --color-vault-bg: #130a10;
+  --color-vault-panel: #1e1019;
+  --color-vault-card: #271420;
+  --color-vault-border: #46243a;
+  --color-vault-accent: #fb7185;
+  --color-vault-accent2: #fbcfe8;
+}
+[data-theme='glacier'] {
+  --color-vault-bg: #06111a;
+  --color-vault-panel: #0b1b28;
+  --color-vault-card: #0f2434;
+  --color-vault-border: #1e3d52;
+  --color-vault-accent: #38bdf8;
+  --color-vault-accent2: #e0f2fe;
+}
+[data-theme='foret'] {
+  --color-vault-bg: #0a120b;
+  --color-vault-panel: #101c12;
+  --color-vault-card: #142418;
+  --color-vault-border: #26402c;
+  --color-vault-accent: #4ade80;
+  --color-vault-accent2: #fbbf24;
+}
+[data-theme='royal'] {
+  --color-vault-bg: #0b0a16;
+  --color-vault-panel: #131126;
+  --color-vault-card: #191633;
+  --color-vault-border: #2e2a55;
+  --color-vault-accent: #6366f1;
+  --color-vault-accent2: #f59e0b;
+}
+[data-theme='neon'] {
+  --color-vault-bg: #050807;
+  --color-vault-panel: #0a120e;
+  --color-vault-card: #0d1713;
+  --color-vault-border: #1d3a2d;
+  --color-vault-accent: #00ff88;
+  --color-vault-accent2: #ff2ec4;
+}
+[data-theme='volcan'] {
+  --color-vault-bg: #140705;
+  --color-vault-panel: #1e0c08;
+  --color-vault-card: #26100a;
+  --color-vault-border: #452016;
+  --color-vault-accent: #ff4d00;
+  --color-vault-accent2: #fbbf24;
+}
+[data-theme='cyber'] {
+  --color-vault-bg: #0d0c04;
+  --color-vault-panel: #16140a;
+  --color-vault-card: #1d1a0d;
+  --color-vault-border: #3b3416;
+  --color-vault-accent: #fde047;
+  --color-vault-accent2: #22d3ee;
+}
+[data-theme='abysse'] {
+  --color-vault-bg: #030c16;
+  --color-vault-panel: #071523;
+  --color-vault-card: #0a1c2e;
+  --color-vault-border: #16344d;
+  --color-vault-accent: #06b6d4;
+  --color-vault-accent2: #818cf8;
+}
+[data-theme='toxique'] {
+  --color-vault-bg: #0a1004;
+  --color-vault-panel: #111a08;
+  --color-vault-card: #16210b;
+  --color-vault-border: #2d431a;
+  --color-vault-accent: #a3e635;
+  --color-vault-accent2: #c084fc;
+}
+[data-theme='vapeur'] {
+  --color-vault-bg: #0e0916;
+  --color-vault-panel: #170f24;
+  --color-vault-card: #1e142e;
+  --color-vault-border: #382a52;
+  --color-vault-accent: #c084fc;
+  --color-vault-accent2: #5eead4;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
+  background: var(--color-vault-bg);
+  color: var(--color-vault-text);
+  font-family: var(--font-display);
+  user-select: none;
+}
+
+/* fond ambiance : halos animés suivant le thème — bien visibles, dérive continue */
+#root {
+  position: relative;
+}
+#root::before,
+#root::after {
+  content: '';
+  position: fixed;
+  inset: -20%;
+  pointer-events: none;
+  z-index: 0;
+  background-repeat: no-repeat;
+}
+#root::before {
+  background-image:
+    radial-gradient(
+      1100px 800px at 15% -10%,
+      color-mix(in srgb, var(--color-vault-accent) 55%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      1200px 900px at 110% 110%,
+      color-mix(in srgb, var(--color-vault-accent2) 45%, transparent),
+      transparent 62%
+    );
+  animation: aurora-drift-1 14s ease-in-out infinite alternate;
+}
+#root::after {
+  background-image:
+    radial-gradient(
+      900px 750px at 85% 8%,
+      color-mix(in srgb, var(--color-vault-accent2) 40%, transparent),
+      transparent 64%
+    ),
+    radial-gradient(
+      1050px 800px at 8% 92%,
+      color-mix(in srgb, var(--color-vault-accent) 45%, transparent),
+      transparent 64%
+    );
+  animation: aurora-drift-2 18s ease-in-out infinite alternate;
+}
+
+@keyframes aurora-drift-1 {
+  0% {
+    transform: translate(-10%, -6%) scale(1);
+  }
+  50% {
+    transform: translate(14%, 15%) scale(1.25);
+  }
+  100% {
+    transform: translate(-13%, 9%) scale(1.08);
+  }
+}
+@keyframes aurora-drift-2 {
+  0% {
+    transform: translate(9%, 5%) scale(1.15);
+  }
+  50% {
+    transform: translate(-16%, -13%) scale(1);
+  }
+  100% {
+    transform: translate(13%, -8%) scale(1.22);
+  }
+}
+
+/* réglage "Fond animé" : désactivation complète des halos selon le style choisi */
+[data-bg='off'] #root::before,
+[data-bg='off'] #root::after,
+[data-bg='grille'] #root::before,
+[data-bg='grille'] #root::after,
+[data-bg='meteores'] #root::before,
+[data-bg='meteores'] #root::after,
+[data-bg='nebuleuse'] #root::before,
+[data-bg='nebuleuse'] #root::after,
+[data-bg='plasma'] #root::before,
+[data-bg='plasma'] #root::after,
+[data-bg='liquide'] #root::before,
+[data-bg='liquide'] #root::after {
+  display: none;
+}
+/* ces styles gardent une base de halos très discrète */
+[data-bg='constellation'] #root::before,
+[data-bg='constellation'] #root::after,
+[data-bg='lucioles'] #root::before,
+[data-bg='lucioles'] #root::after,
+[data-bg='vortex'] #root::before,
+[data-bg='vortex'] #root::after,
+[data-bg='flux'] #root::before,
+[data-bg='flux'] #root::after {
+  opacity: 0.3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #root::before,
+  #root::after {
+    animation: none;
+  }
+}
+
+/* réglage "Taille des cartes" : minimum de la grille de la bibliothèque
+   compact = vraie compacte (nouvelle, la plus petite) ; normal = Moyenne (ex-Compacte) ;
+   large = Grande (ex-Normale). --root sert de valeur transitoire avant le chargement des réglages. */
+:root {
+  --card-min: 128px;
+}
+[data-cards='compact'] {
+  --card-min: 100px;
+}
+[data-cards='large'] {
+  --card-min: 160px;
+}
+
+.titlebar-drag {
+  -webkit-app-region: drag;
+}
+.titlebar-nodrag {
+  -webkit-app-region: no-drag;
+}
+
+.glass {
+  background: color-mix(in srgb, var(--color-vault-card) 55%, transparent);
+  backdrop-filter: blur(18px);
+  border: 1px solid color-mix(in srgb, var(--color-vault-accent) 14%, transparent);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #2c2c4a;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3d3d63;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.text-glow {
+  text-shadow: 0 0 24px color-mix(in srgb, var(--color-vault-accent) 55%, transparent);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+.skeleton {
+  background: linear-gradient(90deg, #171728 25%, #1f1f36 50%, #171728 75%);
+  background-size: 400px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+/* récompense : sweep lumineux au survol des succès débloqués */
+.reward-shine {
+  position: relative;
+  overflow: hidden;
+}
+.reward-shine::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.09) 50%, transparent 62%);
+  transform: translateX(-130%);
+}
+.reward-shine:hover::after {
+  transition: transform 0.7s ease;
+  transform: translateX(130%);
+}
+
+/* barre de téléchargement « indéterminée » : va-et-vient tant que la taille totale
+   n'est pas renseignée (on ne connaît pas le %, mais on montre que ça avance) */
+@keyframes dl-slide {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(420%);
+  }
+}
+.dl-indeterminate {
+  animation: dl-slide 1.3s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dl-indeterminate {
+    animation-duration: 2.4s;
+  }
+}
+
+/* barre de téléchargement ACTIVE : chevrons lumineux qui défilent DANS la partie remplie —
+   signal visuel « ça travaille en ce moment » même quand le % bouge lentement (gros jeux) */
+@keyframes dl-flow {
+  to {
+    background-position: 44px 0;
+  }
+}
+.dl-flow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0.22) 0 10px,
+    transparent 10px 22px
+  );
+  background-size: 44px 100%;
+  animation: dl-flow 0.9s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dl-flow::after {
+    animation-duration: 3s;
+  }
+}

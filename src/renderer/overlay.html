@@ -1,0 +1,1008 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>All Access Overlay</title>
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; connect-src 'self'"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        background: transparent;
+        overflow: hidden;
+        height: 100%;
+        font-family: 'Segoe UI Variable Display', 'Segoe UI', system-ui, sans-serif;
+        user-select: none;
+      }
+      #stage {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+      }
+
+      .banner {
+        --a1: #8b5cf6; /* accent thème */
+        --a2: #22d3ee;
+        --tc: #22d3ee; /* couleur du tier de rareté */
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        width: 610px;
+        padding: 15px 22px 15px 15px;
+        border-radius: 20px;
+        background:
+          linear-gradient(160deg, color-mix(in srgb, var(--a1) 12%, transparent), transparent 45%),
+          rgba(8, 8, 14, 0.92);
+        backdrop-filter: blur(22px);
+        border: 1px solid color-mix(in srgb, var(--a1) 55%, transparent);
+        box-shadow:
+          0 14px 52px rgba(0, 0, 0, 0.65),
+          0 0 48px color-mix(in srgb, var(--a1) 30%, transparent),
+          inset 0 1px 0 rgba(255, 255, 255, 0.07);
+        position: relative;
+        animation: enter 0.7s cubic-bezier(0.16, 1.4, 0.3, 1) both;
+      }
+      .banner.out {
+        animation: exit 0.5s cubic-bezier(0.5, 0, 0.75, 0) both;
+      }
+
+      /* épique / légendaire : la bordure et la lueur prennent la couleur du tier */
+      .banner.t4,
+      .banner.t5 {
+        border-color: color-mix(in srgb, var(--tc) 62%, transparent);
+        box-shadow:
+          0 14px 52px rgba(0, 0, 0, 0.65),
+          0 0 64px color-mix(in srgb, var(--tc) 42%, transparent),
+          inset 0 1px 0 rgba(255, 255, 255, 0.09);
+      }
+      /* légendaire : titre en or, anneau doré, halo pulsé */
+      .banner.t5 {
+        animation:
+          enter 0.7s cubic-bezier(0.16, 1.4, 0.3, 1) both,
+          legend-pulse 2.2s 0.8s ease-in-out infinite;
+      }
+      .banner.t5 .name {
+        background: linear-gradient(92deg, #fde68a, #fbbf24 45%, #f59e0b 70%, #fde68a);
+        background-size: 200% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation:
+          fadeup 0.5s 0.32s cubic-bezier(0.2, 0.9, 0.3, 1) both,
+          gold-flow 2.4s 0.9s linear infinite;
+      }
+      .banner.t5 .ring {
+        background: conic-gradient(from 0deg, #fbbf24, #fde68a, transparent 35%, #fbbf24);
+      }
+      @keyframes legend-pulse {
+        0%,
+        100% {
+          box-shadow:
+            0 14px 52px rgba(0, 0, 0, 0.65),
+            0 0 58px color-mix(in srgb, var(--tc) 38%, transparent),
+            inset 0 1px 0 rgba(255, 255, 255, 0.09);
+        }
+        50% {
+          box-shadow:
+            0 14px 52px rgba(0, 0, 0, 0.65),
+            0 0 84px color-mix(in srgb, var(--tc) 60%, transparent),
+            inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        }
+      }
+      @keyframes gold-flow {
+        to {
+          background-position: 200% 0;
+        }
+      }
+
+      /* onde de choc depuis l'icône */
+      .shock {
+        position: absolute;
+        left: 54px;
+        top: 50%;
+        width: 24px;
+        height: 24px;
+        margin: -12px 0 0 -12px;
+        border-radius: 50%;
+        border: 2px solid var(--tc);
+        opacity: 0;
+        pointer-events: none;
+        animation: shock 0.9s ease-out both;
+        box-shadow: 0 0 18px color-mix(in srgb, var(--tc) 60%, transparent);
+      }
+      @keyframes shock {
+        0% {
+          opacity: 0.95;
+          transform: scale(0.3);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(6.5);
+        }
+      }
+      @keyframes enter {
+        0% {
+          transform: translateY(150%) scale(0.9);
+          opacity: 0;
+        }
+        100% {
+          transform: translateY(0) scale(1);
+          opacity: 1;
+        }
+      }
+      @keyframes exit {
+        to {
+          transform: translateY(160%) scale(0.95);
+          opacity: 0;
+        }
+      }
+
+      /* sweep lumineux */
+      .sheen {
+        position: absolute;
+        inset: 0;
+        border-radius: 20px;
+        overflow: hidden;
+        pointer-events: none;
+      }
+      .sheen::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          115deg,
+          transparent 32%,
+          color-mix(in srgb, var(--a2) 26%, transparent) 48%,
+          rgba(255, 255, 255, 0.12) 52%,
+          transparent 64%
+        );
+        transform: translateX(-115%);
+        animation: shine 1.3s 0.5s ease-out both;
+      }
+      @keyframes shine {
+        to {
+          transform: translateX(115%);
+        }
+      }
+
+      /* icône + anneau rotatif */
+      .iconwrap {
+        position: relative;
+        width: 78px;
+        height: 78px;
+        flex-shrink: 0;
+        animation: pop 0.6s 0.15s cubic-bezier(0.2, 2.2, 0.4, 1) both;
+      }
+      @keyframes pop {
+        from {
+          transform: scale(0) rotate(-18deg);
+        }
+        to {
+          transform: scale(1) rotate(0);
+        }
+      }
+      .ring {
+        position: absolute;
+        inset: -3px;
+        border-radius: 18px;
+        background: conic-gradient(from 0deg, var(--a1), var(--a2), transparent 35%, var(--a1));
+        animation: spin 2.6s linear infinite;
+        filter: blur(0.5px);
+        opacity: 0.9;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .iconbox {
+        position: absolute;
+        inset: 0;
+        border-radius: 15px;
+        overflow: hidden;
+        background: linear-gradient(135deg, var(--a1), var(--a2));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 38px;
+        box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.5);
+      }
+      .iconbox img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      /* textes en cascade */
+      .txt {
+        min-width: 0;
+        flex: 1;
+      }
+      .kicker,
+      .name,
+      .desc {
+        opacity: 0;
+        animation: fadeup 0.5s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+      }
+      .kicker {
+        animation-delay: 0.22s;
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: 0.22em;
+        background: linear-gradient(90deg, var(--a1), var(--a2));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        margin-bottom: 3px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .tierchip {
+        -webkit-background-clip: initial;
+        background-clip: initial;
+        background: color-mix(in srgb, var(--tc) 22%, transparent);
+        color: var(--tc);
+        border-radius: 6px;
+        padding: 1.5px 7px;
+        letter-spacing: 0.1em;
+        font-size: 9.5px;
+      }
+      .name {
+        animation-delay: 0.32s;
+        font-size: 20px;
+        font-weight: 800;
+        color: #f4f4fc;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+      }
+      .desc {
+        animation-delay: 0.42s;
+        font-size: 12.5px;
+        color: #9c9cba;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-top: 2px;
+      }
+      @keyframes fadeup {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* colonne droite : jeu, rareté, progression */
+      .meta {
+        flex-shrink: 0;
+        text-align: right;
+        max-width: 150px;
+        opacity: 0;
+        animation: fadeup 0.5s 0.5s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+      }
+      .game {
+        font-size: 11px;
+        font-weight: 700;
+        color: #8a8aa8;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .rarity {
+        margin-top: 3px;
+        font-size: 13px;
+        font-weight: 900;
+        color: var(--tc);
+      }
+      .progress {
+        margin-top: 6px;
+      }
+      .progress .count {
+        font-size: 10.5px;
+        font-weight: 700;
+        color: #8a8aa8;
+      }
+      .progress .bar {
+        margin-top: 3px;
+        height: 4px;
+        width: 110px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.12);
+        overflow: hidden;
+        margin-left: auto;
+      }
+      .progress .fill {
+        height: 100%;
+        border-radius: 4px;
+        background: linear-gradient(90deg, var(--a1), var(--a2));
+        width: 0;
+        animation: grow 0.9s 0.7s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+      }
+      @keyframes grow {
+        from {
+          width: 0;
+        }
+      }
+
+      /* ============ STYLE « TOAST » (compact, coin haut-droit) ============ */
+      body[data-notif='toast'] .banner {
+        width: 400px;
+        gap: 13px;
+        padding: 12px 16px 12px 12px;
+        border-radius: 16px;
+        animation: toast-in 0.55s cubic-bezier(0.16, 1.3, 0.3, 1) both;
+      }
+      body[data-notif='toast'] .banner.out {
+        animation: toast-out 0.4s cubic-bezier(0.5, 0, 0.75, 0) both;
+      }
+      body[data-notif='toast'] .iconwrap {
+        width: 56px;
+        height: 56px;
+      }
+      body[data-notif='toast'] .iconbox {
+        font-size: 28px;
+      }
+      body[data-notif='toast'] .name {
+        font-size: 16px;
+      }
+      body[data-notif='toast'] .desc,
+      body[data-notif='toast'] .meta {
+        display: none;
+      }
+      @keyframes toast-in {
+        from {
+          transform: translateX(120%);
+          opacity: 0;
+        }
+      }
+      @keyframes toast-out {
+        to {
+          transform: translateX(120%);
+          opacity: 0;
+        }
+      }
+
+      /* ============ STYLE « CINÉMA » (grande carte centrée verticale) ============ */
+      body[data-notif='cinema'] .banner {
+        flex-direction: column;
+        width: 440px;
+        text-align: center;
+        gap: 14px;
+        padding: 30px 34px 26px;
+        border-radius: 28px;
+        animation: cinema-in 0.7s cubic-bezier(0.16, 1.3, 0.3, 1) both;
+      }
+      body[data-notif='cinema'] .banner.out {
+        animation: cinema-out 0.5s ease-in both;
+      }
+      body[data-notif='cinema'] .iconwrap {
+        width: 118px;
+        height: 118px;
+      }
+      body[data-notif='cinema'] .iconbox {
+        font-size: 56px;
+        border-radius: 22px;
+      }
+      body[data-notif='cinema'] .ring {
+        border-radius: 26px;
+      }
+      body[data-notif='cinema'] .txt {
+        width: 100%;
+      }
+      body[data-notif='cinema'] .kicker {
+        justify-content: center;
+        font-size: 12px;
+      }
+      body[data-notif='cinema'] .name {
+        font-size: 26px;
+        white-space: normal;
+      }
+      body[data-notif='cinema'] .desc {
+        white-space: normal;
+        font-size: 13.5px;
+      }
+      body[data-notif='cinema'] .meta {
+        max-width: none;
+        text-align: center;
+        margin-top: 4px;
+      }
+      body[data-notif='cinema'] .progress .bar {
+        margin: 3px auto 0;
+      }
+      @keyframes cinema-in {
+        from {
+          transform: scale(0.82) translateY(24px);
+          opacity: 0;
+        }
+      }
+      @keyframes cinema-out {
+        to {
+          transform: scale(0.9) translateY(16px);
+          opacity: 0;
+        }
+      }
+
+      /* ============ STYLE « PLEIN ÉCRAN » (cinématique, couvre tout l'écran) ============ */
+      body[data-notif='plein'] #stage {
+        background: radial-gradient(ellipse 62% 58% at 50% 46%, rgba(0, 0, 0, 0.74), rgba(0, 0, 0, 0.16) 68%, transparent);
+        animation: fade-backdrop 0.5s ease both;
+      }
+      body[data-notif='plein'] .banner {
+        flex-direction: column;
+        width: min(620px, 82vw);
+        text-align: center;
+        gap: 20px;
+        padding: 44px 48px 40px;
+        border-radius: 32px;
+        animation: plein-in 0.75s cubic-bezier(0.16, 1.35, 0.3, 1) both;
+      }
+      body[data-notif='plein'] .banner.out {
+        animation: plein-out 0.5s ease-in both;
+      }
+      body[data-notif='plein'] .iconwrap {
+        width: 150px;
+        height: 150px;
+      }
+      body[data-notif='plein'] .iconbox {
+        font-size: 72px;
+        border-radius: 26px;
+      }
+      body[data-notif='plein'] .ring {
+        border-radius: 30px;
+      }
+      body[data-notif='plein'] .txt {
+        width: 100%;
+      }
+      body[data-notif='plein'] .kicker {
+        justify-content: center;
+        font-size: 14px;
+        letter-spacing: 0.28em;
+      }
+      body[data-notif='plein'] .name {
+        font-size: 36px;
+        white-space: normal;
+      }
+      body[data-notif='plein'] .desc {
+        white-space: normal;
+        font-size: 15px;
+      }
+      body[data-notif='plein'] .meta {
+        max-width: none;
+        text-align: center;
+        margin-top: 6px;
+      }
+      body[data-notif='plein'] .progress .bar {
+        margin: 3px auto 0;
+      }
+      @keyframes fade-backdrop {
+        from {
+          opacity: 0;
+        }
+      }
+      @keyframes plein-in {
+        from {
+          transform: scale(0.6) translateY(30px);
+          opacity: 0;
+        }
+      }
+      @keyframes plein-out {
+        to {
+          transform: scale(0.92);
+          opacity: 0;
+        }
+      }
+
+      /* ============ STYLE « STICKER » (rouleau lancé de la droite, qui se déroule) ============
+         Le CSS ne sait pas COURBER un plan : impossible d'enrouler vraiment la carte. L'astuce est
+         donc de ne jamais la montrer enroulée — pendant le vol, le seul objet visible est un
+         ROULEAU (un cylindre dessiné en dégradés). À l'impact, la carte se révèle par un clip-path
+         dont la frontière est calée EXACTEMENT sur le centre du rouleau : la matière semble sortir
+         de dessous le cylindre à mesure qu'il se dévide, et le rouleau maigrit en même temps.
+         Trois couches, chacune avec son pivot :
+         - .stickerwrap = LE LANCER (trajectoire + inclinaison finale, partagées par tout le reste)
+         - .roll        = LE ROULEAU (vole, encaisse le choc, puis se dévide vers la gauche)
+         - .banner      = LA MATIÈRE (ne bouge pas : elle se dévoile, c'est tout) */
+      body[data-notif='sticker'] #stage {
+        perspective: 1300px;
+        perspective-origin: 62% 50%;
+        /* la vitre encaisse le choc (0,40 s = instant du contact) */
+        animation: sticker-shake 0.36s 0.4s cubic-bezier(0.3, 0, 0.4, 1) both;
+      }
+      .stickerwrap {
+        position: relative;
+        display: flex;
+        animation: sticker-throw 0.72s both;
+      }
+      body[data-notif='sticker'] .banner {
+        border: 4px solid #f4f4fc;
+        border-radius: 22px;
+        box-shadow:
+          0 20px 44px rgba(0, 0, 0, 0.6),
+          0 0 0 1px rgba(0, 0, 0, 0.45),
+          inset 0 0 0 1px color-mix(in srgb, var(--a1) 30%, transparent);
+        /* les marges négatives haut/bas/droite laissent passer l'ombre portée et l'onglet corné :
+           seule la frontière GAUCHE sert au dévoilement */
+        animation: sticker-unroll 0.62s 0.5s cubic-bezier(0.36, 0.03, 0.28, 1) both;
+      }
+      body[data-notif='sticker'] .banner.out {
+        animation: sticker-peel 0.5s cubic-bezier(0.5, 0, 0.85, 0.2) both;
+        clip-path: none;
+      }
+      @keyframes sticker-unroll {
+        0% {
+          clip-path: inset(-40px -40px -40px 100%);
+        }
+        100% {
+          clip-path: inset(-40px -40px -40px 0);
+        }
+      }
+      /* ---- LE ROULEAU ---- cylindre : galbe en dégradé + fines couches enroulées qui défilent */
+      .roll {
+        position: absolute;
+        top: 50%;
+        left: 100%;
+        width: 58px;
+        height: calc(100% + 18px);
+        margin-left: -29px;
+        border-radius: 11px;
+        z-index: 2;
+        pointer-events: none;
+        background-image:
+          repeating-linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.85) 0 1.5px,
+            rgba(255, 255, 255, 0) 1.5px 7px
+          ),
+          linear-gradient(
+            90deg,
+            #23252f 0%,
+            #c9cde2 16%,
+            #ffffff 30%,
+            #e8eaf4 40%,
+            #9aa0bb 62%,
+            #43465c 82%,
+            #16171f 100%
+          );
+        background-size:
+          7px 100%,
+          100% 100%;
+        box-shadow:
+          14px 0 26px rgba(0, 0, 0, 0.5),
+          /* l'ombre que le rouleau projette sur la feuille déjà posée, à sa droite */ 0 10px 26px rgba(0, 0, 0, 0.55),
+          inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+        animation:
+          roll-life 1.12s both,
+          roll-unwind 0.62s 0.5s cubic-bezier(0.36, 0.03, 0.28, 1) both,
+          roll-spin 1.12s linear both;
+      }
+      /* traînée de vitesse du rouleau pendant le lancer */
+      .roll::after {
+        content: '';
+        position: absolute;
+        top: 2%;
+        left: 45%;
+        width: 46vw;
+        height: 96%;
+        border-radius: 50%;
+        pointer-events: none;
+        transform-origin: left center;
+        background: linear-gradient(
+          to right,
+          rgba(255, 255, 255, 0.5),
+          color-mix(in srgb, var(--a2) 52%, transparent) 20%,
+          color-mix(in srgb, var(--a1) 26%, transparent) 52%,
+          transparent 84%
+        );
+        filter: blur(10px);
+        z-index: -1;
+        animation: sticker-trail 0.42s cubic-bezier(0.2, 0.45, 0.5, 0.92) both;
+      }
+      /* vie du rouleau : flou de vitesse en vol, écrasement au choc, éclair sur le cylindre */
+      @keyframes roll-life {
+        0% {
+          /* flou modéré : au-delà, le galbe du cylindre est détruit et il ne reste qu'une pastille */
+          filter: blur(4px);
+          transform: translateY(-50%) scaleX(1.2) scaleY(1);
+          animation-timing-function: cubic-bezier(0.22, 0.42, 0.5, 0.92);
+        }
+        34% {
+          filter: blur(0.8px);
+          transform: translateY(-50%) scaleX(1.06) scaleY(1);
+          animation-timing-function: linear;
+        }
+        36% {
+          /* CHOC contre la vitre : le cylindre s'aplatit et s'illumine */
+          filter: blur(0) brightness(1.85);
+          transform: translateY(-50%) scaleX(0.82) scaleY(1.1);
+          animation-timing-function: cubic-bezier(0.3, 0, 0.3, 1);
+        }
+        42% {
+          filter: blur(0) brightness(1);
+          transform: translateY(-50%) scaleX(1.08) scaleY(0.95);
+          animation-timing-function: ease-in-out;
+        }
+        48% {
+          transform: translateY(-50%) scaleX(0.98) scaleY(1.01);
+          animation-timing-function: ease-out;
+        }
+        100% {
+          filter: blur(0) brightness(1);
+          transform: translateY(-50%) scaleX(1) scaleY(1);
+        }
+      }
+      /* dévidage : le rouleau file vers la gauche EN MAIGRISSANT (il rend sa matière),
+         puis s'efface quand il n'a plus rien à dérouler */
+      @keyframes roll-unwind {
+        0% {
+          left: 100%;
+          width: 58px;
+          margin-left: -29px;
+          opacity: 1;
+        }
+        78% {
+          width: 20px;
+          margin-left: -10px;
+          opacity: 1;
+        }
+        100% {
+          left: 0%;
+          width: 7px;
+          margin-left: -3.5px;
+          opacity: 0;
+        }
+      }
+      /* rotation : ce sont les fines couches enroulées qui défilent, pas le cylindre qui tourne */
+      @keyframes roll-spin {
+        to {
+          background-position:
+            -217px 0,
+            0 0;
+        }
+      }
+      /* LE LANCER : trajectoire + légère parabole, puis rebond du choc. Inclinaison finale portée
+         ici, donc partagée par le rouleau ET la carte. Liste de fonctions identique partout. */
+      @keyframes sticker-throw {
+        0% {
+          transform: translate3d(88vw, -20px, 0) rotate(-8deg) scale(1);
+          animation-timing-function: cubic-bezier(0.22, 0.42, 0.5, 0.92);
+        }
+        56% {
+          /* contact à 0,40 s */
+          transform: translate3d(0, 0, 0) rotate(-4.6deg) scale(1);
+          animation-timing-function: cubic-bezier(0.3, 0, 0.3, 1);
+        }
+        66% {
+          transform: translate3d(4px, 0, 0) rotate(-0.6deg) scale(0.975);
+          animation-timing-function: ease-in-out;
+        }
+        78% {
+          transform: translate3d(-2px, 0, 0) rotate(-3.7deg) scale(1.012);
+          animation-timing-function: ease-in-out;
+        }
+        89% {
+          transform: translate3d(1px, 0, 0) rotate(-2deg) scale(0.996);
+          animation-timing-function: ease-out;
+        }
+        100% {
+          transform: translate3d(0, 0, 0) rotate(-2.5deg) scale(1);
+        }
+      }
+      @keyframes sticker-trail {
+        0% {
+          opacity: 0.85;
+          transform: scaleX(1);
+        }
+        60% {
+          opacity: 0.5;
+          transform: scaleX(0.5);
+        }
+        100% {
+          opacity: 0;
+          transform: scaleX(0.04);
+        }
+      }
+      /* anneau de choc propagé dans la vitre — au point d'impact, cette fois le bord DROIT */
+      .slapring {
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        width: 150px;
+        height: 150px;
+        margin: -75px 0 0 -75px;
+        border-radius: 50%;
+        border: 2px solid color-mix(in srgb, var(--tc, #fff) 65%, transparent);
+        box-shadow: 0 0 22px color-mix(in srgb, var(--tc, #fff) 35%, transparent);
+        opacity: 0;
+        pointer-events: none;
+        animation: slap-ring 0.66s 0.4s cubic-bezier(0.15, 0.78, 0.3, 1) both;
+      }
+      @keyframes slap-ring {
+        0% {
+          opacity: 0.75;
+          transform: scale(0.2) scaleY(0.42);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(4.8) scaleY(0.42);
+        }
+      }
+      /* petit coin « corné » : il est du côté droit, donc dévoilé en premier — il tressaute
+         juste après être sorti du rouleau */
+      body[data-notif='sticker'] .banner::before {
+        content: '';
+        position: absolute;
+        top: -4px;
+        right: 26px;
+        width: 46px;
+        height: 20px;
+        background: #f4f4fc;
+        border-radius: 0 0 12px 12px;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+        z-index: 1;
+        transform-origin: 50% 0;
+        animation: tab-flap 0.6s 0.56s cubic-bezier(0.3, 0, 0.3, 1) both;
+      }
+      @keyframes tab-flap {
+        0% {
+          transform: scaleY(0.25);
+        }
+        40% {
+          transform: scaleY(1.22);
+        }
+        70% {
+          transform: scaleY(0.9);
+        }
+        100% {
+          transform: scaleY(1);
+        }
+      }
+      /* flash blanc : quand la dernière bande sort du rouleau, l'autocollant est complet */
+      body[data-notif='sticker'] .sheen::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: radial-gradient(
+          130% 150% at 22% 50%,
+          rgba(255, 255, 255, 0.55),
+          rgba(255, 255, 255, 0.12) 52%,
+          transparent 76%
+        );
+        animation: sticker-flash 0.34s 1.1s ease-out both;
+      }
+      /* un autocollant est imprimé d'un seul tenant : pas de cascade de textes au dévoilement */
+      body[data-notif='sticker'] .banner .kicker,
+      body[data-notif='sticker'] .banner .name,
+      body[data-notif='sticker'] .banner .desc,
+      body[data-notif='sticker'] .banner .meta,
+      body[data-notif='sticker'] .banner .iconwrap {
+        animation-delay: 0s;
+        animation-duration: 0.22s;
+      }
+      /* le vernis brillant balaie la surface UNE FOIS le rouleau entièrement dévidé */
+      body[data-notif='sticker'] .sheen::after {
+        animation: shine 0.9s 1.14s ease-out both;
+      }
+      @keyframes sticker-flash {
+        0% {
+          opacity: 0.85;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+      /* la vitre encaisse le choc */
+      @keyframes sticker-shake {
+        0%,
+        100% {
+          transform: translate3d(0, 0, 0);
+        }
+        14% {
+          transform: translate3d(-8px, 3px, 0);
+        }
+        34% {
+          transform: translate3d(5px, -2px, 0);
+        }
+        56% {
+          transform: translate3d(-3px, 1px, 0);
+        }
+        78% {
+          transform: translate3d(1.5px, 0, 0);
+        }
+      }
+      /* poussière chassée de sous l'autocollant au moment où il plaque */
+      .dust {
+        position: absolute;
+        left: var(--px, 50%);
+        top: var(--py, 100%);
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: var(--pc, rgba(255, 255, 255, 0.85));
+        opacity: 0;
+        pointer-events: none;
+        filter: blur(0.4px);
+        animation: fly 0.55s cubic-bezier(0.1, 0.7, 0.3, 1) both;
+      }
+      /* sortie : le bord libre se soulève, puis toute la vignette est arrachée vers la gauche
+         (même contrainte que pour l'entrée : liste de fonctions identique dans les 3 images) */
+      @keyframes sticker-peel {
+        0% {
+          transform: translate3d(0, 0, 0) rotate(-2.5deg) rotateY(0deg) scale(1);
+          opacity: 1;
+        }
+        26% {
+          transform: translate3d(2.2vw, 0, 0) rotate(1.5deg) rotateY(-14deg) scale(1.04);
+          opacity: 1;
+        }
+        100% {
+          transform: translate3d(-85vw, 0, 0) rotate(-15deg) rotateY(42deg) scale(0.88);
+          opacity: 0;
+        }
+      }
+
+      /* ============ STYLE « FEU D'ARTIFICE » (gerbes d'étincelles discrètes) ============ */
+      body[data-notif='feuartifice'] .banner {
+        animation: fw-enter 0.6s cubic-bezier(0.2, 1.25, 0.35, 1) both;
+      }
+      body[data-notif='feuartifice'] .banner.out {
+        animation: exit 0.5s cubic-bezier(0.5, 0, 0.75, 0) both;
+      }
+      @keyframes fw-enter {
+        from {
+          transform: translateY(45%) scale(0.92);
+          opacity: 0;
+        }
+      }
+      /* étincelle de gerbe (générée en JS, origine et trajectoire via variables CSS) */
+      .fw {
+        position: absolute;
+        left: var(--ox, 50%);
+        top: var(--oy, 0);
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--pc, #fff);
+        box-shadow: 0 0 8px 1px var(--pc, #fff);
+        opacity: 0;
+        pointer-events: none;
+        animation: fw-burst var(--dur, 1s) ease-out both;
+        animation-delay: var(--delay, 0s);
+      }
+      @keyframes fw-burst {
+        0% {
+          opacity: 0;
+          transform: translate(0, 0) scale(0.5);
+        }
+        8% {
+          opacity: 1;
+        }
+        55% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+          /* +18px sur y = légère retombée gravitaire en fin de course */
+          transform: translate(var(--dx), calc(var(--dy) + 18px)) scale(0.2);
+        }
+      }
+
+      /* ============ STYLE « NÉON » (enseigne qui grésille et s'allume) ============ */
+      body[data-notif='neon'] .banner {
+        border: 2px solid var(--tc);
+        background:
+          linear-gradient(160deg, color-mix(in srgb, var(--tc) 8%, transparent), transparent 55%),
+          rgba(5, 5, 11, 0.96);
+        box-shadow:
+          0 0 5px var(--tc),
+          0 0 22px color-mix(in srgb, var(--tc) 55%, transparent),
+          inset 0 0 16px color-mix(in srgb, var(--tc) 20%, transparent);
+        animation: neon-on 1.3s both;
+      }
+      body[data-notif='neon'] .banner.out {
+        animation: neon-off 0.45s both;
+      }
+      body[data-notif='neon'] .name {
+        color: #fff;
+        text-shadow:
+          0 0 6px var(--tc),
+          0 0 15px var(--tc);
+      }
+      body[data-notif='neon'] .iconbox {
+        box-shadow:
+          inset 0 0 0 2px rgba(0, 0, 0, 0.5),
+          0 0 16px color-mix(in srgb, var(--tc) 55%, transparent);
+      }
+      /* clignotement de tube néon à l'allumage */
+      @keyframes neon-on {
+        0% {
+          opacity: 0;
+        }
+        6% {
+          opacity: 1;
+        }
+        9% {
+          opacity: 0.25;
+        }
+        13% {
+          opacity: 1;
+        }
+        17% {
+          opacity: 0.4;
+        }
+        21% {
+          opacity: 1;
+        }
+        26% {
+          opacity: 0.7;
+        }
+        30%,
+        100% {
+          opacity: 1;
+        }
+      }
+      @keyframes neon-off {
+        0% {
+          opacity: 1;
+        }
+        35% {
+          opacity: 0.3;
+        }
+        55% {
+          opacity: 0.85;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+
+      /* particules (épique / légendaire) */
+      .particle {
+        position: absolute;
+        left: 44px;
+        top: 50%;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--pc, var(--a2));
+        pointer-events: none;
+        opacity: 0;
+        animation: fly 1.1s cubic-bezier(0.15, 0.8, 0.4, 1) both;
+        box-shadow: 0 0 8px var(--pc, var(--a2));
+      }
+      @keyframes fly {
+        0% {
+          opacity: 0;
+          transform: translate(0, 0) scale(0.4);
+        }
+        12% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+          transform: translate(var(--dx), var(--dy)) scale(1);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stage"></div>
+    <script type="module" src="/src/overlay.ts"></script>
+  </body>
+</html>

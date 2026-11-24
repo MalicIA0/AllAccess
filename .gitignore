@@ -1,0 +1,9 @@
+node_modules/
+out/
+release/
+*.log
+.DS_Store
+backup/
+*.tsbuildinfo
+# Binaires tiers / compilés ailleurs (voir README)
+resources/perf/
